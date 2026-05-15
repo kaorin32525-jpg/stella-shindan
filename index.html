@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>星の鍵・分岐診断 | ステラ🌙</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+JP:wght@200;300;400&display=swap');
+
+    :root {
+      --bg-base: #2a2535;
+      --lavender: #9b8ab8;
+      --lavender-soft: #c8b8e0;
+      --pink: #e0a0c0;
+      --gold: #d4aa60;
+      --gold-light: #f0cc80;
+      --gold-pale: #f8e8c0;
+      --white: #f5eef8;
+      --text-main: #ede0f5;
+      --text-sub: #c0aed8;
+      --card-bg: rgba(255,255,255,0.06);
+      --border: rgba(212,170,96,0.3);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Serif JP', 'Georgia', serif;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      line-break: strict;
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+
+    /* ── 背景エフェクト ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 40% 80% at 50% 0%,   rgba(255,230,200,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse 70% 50% at 20% 30%,  rgba(160,130,200,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 80% 70%,  rgba(180,120,160,0.12) 0%, transparent 50%),
+        linear-gradient(175deg, #302840 0%, #252035 35%, #2a2238 65%, #201c30 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* 光の柱エフェクト（1枚目画像のイメージ） */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 160px;
+      height: 55vh;
+      background: linear-gradient(to bottom,
+        rgba(255,240,210,0.18) 0%,
+        rgba(220,190,240,0.10) 40%,
+        transparent 100%);
+      filter: blur(40px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .stars-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── レイアウト ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── セクション共通 ── */
+    section { padding: 0 0 64px; }
+
+    /* ── 表紙エリア ── */
+    .cover {
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 80px 0 64px;
+      position: relative;
+    }
+
+    .cover-emblem {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 11px;
+      letter-spacing: 0.35em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 48px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.3s forwards;
+    }
+
+    .cover-key-icon {
+      font-size: 32px;
+      margin-bottom: 32px;
+      display: block;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.5s forwards;
+      filter: drop-shadow(0 0 16px rgba(201,168,76,0.4));
+    }
+
+    .cover-title {
+      font-family: 'Noto Serif JP', serif;
+      font-weight: 300;
+      font-size: 13px;
+      letter-spacing: 0.25em;
+      color: var(--gold);
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.7s forwards;
+    }
+
+    .cover-headline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(28px, 7vw, 40px);
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.3;
+      color: var(--white);
+      margin-bottom: 10px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.9s forwards;
+      letter-spacing: 0.02em;
+    }
+
+    .cover-sub {
+      font-family: 'Noto Serif JP', serif;
+      font-weight: 300;
+      font-size: 14px;
+      letter-spacing: 0.2em;
+      color: var(--lavender-soft);
+      margin-bottom: 52px;
+      opacity: 0;
+      animation: fadeUp 1s ease 1.1s forwards;
+    }
+
+    .cover-divider {
+      width: 1px;
+      height: 48px;
+      background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+      margin: 0 auto 48px;
+      opacity: 0;
+      animation: fadeUp 1s ease 1.2s forwards;
+    }
+
+    .cover-body {
+      font-weight: 400;
+      font-size: 15px;
+      line-height: 2.2;
+      color: #e8daf5;
+      letter-spacing: 0.06em;
+      text-align: left;
+      opacity: 0;
+      animation: fadeUp 1s ease 1.4s forwards;
+      border-left: 1px solid rgba(212,170,96,0.25);
+      padding-left: 20px;
+      line-break: strict;
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+
+    .cover-body p { margin-bottom: 16px; }
+    .cover-body p:last-child { margin-bottom: 0; }
+
+    /* ── 質問セクション ── */
+    .quiz-section { padding-bottom: 80px; }
+
+    .section-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 10px;
+      letter-spacing: 0.5em;
+      color: var(--gold);
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 48px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .section-label::before,
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(212,170,96,0.4));
+    }
+    .section-label::after {
+      background: linear-gradient(to left, transparent, rgba(212,170,96,0.4));
+    }
+
+    .question-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(212,170,96,0.25);
+      border-radius: 2px;
+      padding: 36px 28px;
+      margin-bottom: 32px;
+      position: relative;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .question-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .question-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+      opacity: 0.4;
+    }
+
+    .q-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 10px;
+      letter-spacing: 0.4em;
+      color: var(--gold);
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .q-text {
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 2.0;
+      letter-spacing: 0.06em;
+      color: #ffffff;
+      margin-bottom: 28px;
+      line-break: strict;
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+
+    .choices { display: flex; flex-direction: column; gap: 12px; }
+
+    .choice-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      cursor: pointer;
+      padding: 14px 16px;
+      border: 1px solid transparent;
+      border-radius: 2px;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .choice-label:hover {
+      border-color: rgba(212,170,96,0.3);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .choice-label input[type="radio"] { display: none; }
+
+    .choice-label input[type="radio"]:checked + .choice-indicator {
+      border-color: var(--gold);
+      background: var(--gold);
+      box-shadow: 0 0 12px rgba(212,170,96,0.5);
+    }
+
+    .choice-label input[type="radio"]:checked + .choice-indicator::after {
+      opacity: 1;
+    }
+
+    .choice-label:has(input[type="radio"]:checked) {
+      border-color: rgba(212,170,96,0.4);
+      background: rgba(212,170,96,0.08);
+    }
+
+    .choice-indicator {
+      width: 18px;
+      height: 18px;
+      border: 1px solid rgba(212,170,96,0.45);
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 2px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .choice-indicator::after {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      background: #2a2535;
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .choice-text {
+      font-weight: 400;
+      font-size: 15px;
+      line-height: 2.0;
+      letter-spacing: 0.04em;
+      color: #f0e8ff;
+      line-break: strict;
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+
+    .choice-key {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 10px;
+      color: var(--gold);
+      letter-spacing: 0.2em;
+      margin-right: 4px;
+    }
+
+    /* ── 送信ボタン ── */
+    .submit-area {
+      text-align: center;
+      padding: 32px 0 0;
+    }
+
+    .error-msg {
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: var(--pink);
+      margin-bottom: 24px;
+      min-height: 20px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .error-msg.show { opacity: 1; }
+
+    .btn-submit {
+      display: inline-block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px;
+      letter-spacing: 0.4em;
+      color: #1a1228;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold), #b8903a);
+      border: none;
+      padding: 18px 52px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+    }
+
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .btn-submit:hover::before { opacity: 1; }
+    .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(212,170,96,0.35); }
+    .btn-submit:active { transform: translateY(0); }
+
+    /* ── 結果エリア ── */
+    #result-area { display: none; }
+    #result-area.show { display: block; }
+
+    .result-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .result-type-badge {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 10px;
+      letter-spacing: 0.5em;
+      color: var(--gold);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 32px;
+    }
+
+    .result-card {
+      background: linear-gradient(145deg, rgba(180,140,220,0.1), rgba(212,170,96,0.06), rgba(200,120,160,0.08));
+      border: 1px solid rgba(212,170,96,0.3);
+      border-radius: 2px;
+      padding: 48px 32px;
+      position: relative;
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards;
+    }
+
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold-light), transparent);
+    }
+    .result-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+      opacity: 0.3;
+    }
+
+    .result-icon {
+      font-size: 28px;
+      text-align: center;
+      display: block;
+      margin-bottom: 28px;
+      filter: drop-shadow(0 0 16px rgba(154,104,48,0.5));
+    }
+
+    .result-title {
+      font-family: 'Noto Serif JP', serif;
+      font-weight: 200;
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .result-headline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(20px, 5vw, 26px);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--white);
+      text-align: center;
+      line-height: 1.4;
+      margin-bottom: 40px;
+      letter-spacing: 0.02em;
+    }
+
+    .result-divider {
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+      margin: 0 auto 40px;
+    }
+
+    .result-body {
+      font-weight: 400;
+      font-size: 14.5px;
+      line-height: 1.95;
+      letter-spacing: 0.04em;
+      color: #f0e8ff;
+      line-break: strict;
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+
+    .result-body p { margin-bottom: 20px; }
+    .result-body p:last-child { margin-bottom: 0; }
+
+    /* ── 締めメッセージ ── */
+    .closing {
+      text-align: center;
+      padding: 64px 0 0;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.4s forwards;
+    }
+
+    .closing-line {
+      width: 1px;
+      height: 56px;
+      background: linear-gradient(to bottom, transparent, rgba(212,170,96,0.5), transparent);
+      margin: 0 auto 48px;
+    }
+
+    .closing-text {
+      font-weight: 400;
+      font-size: 15px;
+      line-height: 2.4;
+      letter-spacing: 0.06em;
+      color: #e8daf5;
+      margin-bottom: 40px;
+      line-break: strict;
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+
+    .closing-final {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px;
+      font-style: italic;
+      color: var(--lavender-soft);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── もう一度ボタン ── */
+    .retry-area {
+      text-align: center;
+      margin-top: 56px;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.6s forwards;
+    }
+
+    .btn-retry {
+      display: inline-block;
+      font-family: 'Noto Serif JP', serif;
+      font-weight: 300;
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      color: var(--gold);
+      background: transparent;
+      border: 1px solid rgba(212,170,96,0.35);
+      padding: 14px 36px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-retry:hover {
+      border-color: var(--gold);
+      background: rgba(212,170,96,0.08);
+    }
+
+    /* ── LINE導線 ── */
+    .line-cta {
+      margin-top: 56px;
+      padding: 2px;
+      background: linear-gradient(135deg, rgba(212,170,96,0.6), rgba(180,140,220,0.4), rgba(212,170,96,0.6));
+      border-radius: 4px;
+    }
+
+    .line-cta-inner {
+      background: rgba(26,18,40,0.85);
+      border-radius: 3px;
+      padding: 36px 28px;
+      text-align: center;
+    }
+
+    .line-cta-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 11px;
+      letter-spacing: 0.4em;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+
+    .line-cta-text {
+      font-weight: 400;
+      font-size: 15px;
+      line-height: 2.0;
+      color: #f0e8ff;
+      margin-bottom: 28px;
+      letter-spacing: 0.06em;
+    }
+
+    .btn-line {
+      display: inline-block;
+      font-family: 'Noto Serif JP', serif;
+      font-weight: 400;
+      font-size: 14px;
+      letter-spacing: 0.2em;
+      color: #1a1228;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold), #b8903a);
+      padding: 16px 36px;
+      border-radius: 2px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 24px rgba(212,170,96,0.25);
+    }
+
+    .btn-line:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(212,170,96,0.4);
+    }
+
+    .line-cta-note {
+      margin-top: 16px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: rgba(180,160,210,0.6);
+      line-height: 1.8;
+    }
+
+    /* ── フッター ── */
+    .footer {
+      text-align: center;
+      padding-top: 80px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 10px;
+      letter-spacing: 0.4em;
+      color: rgba(200,180,220,0.35);
+    }
+
+    /* ── アニメーション ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    /* ── スクロールダウン ── */
+    .scroll-hint {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeUp 1s ease 2s forwards;
+    }
+
+    .scroll-hint span {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 9px;
+      letter-spacing: 0.5em;
+      color: rgba(212,170,96,0.5);
+      text-transform: uppercase;
+    }
+
+    .scroll-hint-line {
+      width: 1px;
+      height: 32px;
+      background: linear-gradient(to bottom, rgba(212,170,96,0.5), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; transform: scaleY(1); }
+      50% { opacity: 0.8; transform: scaleY(1.2); }
+    }
+
+    /* ── レスポンシブ ── */
+    @media (max-width: 375px) {
+      .page { padding: 0 16px 60px; }
+      .question-card { padding: 28px 20px; }
+      .result-card { padding: 36px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas class="stars-canvas" id="starsCanvas"></canvas>
+
+<div class="page">
+
+  <!-- 表紙 -->
+  <section class="cover" id="cover">
+    <p class="cover-emblem">Stella 🌙 — Stars & Keys</p>
+    <span class="cover-key-icon">🗝</span>
+    <p class="cover-title">星の鍵・分岐診断</p>
+    <h1 class="cover-headline">今、あなたの現実が<br>動かない理由</h1>
+    <div class="cover-divider"></div>
+    <div class="cover-body">
+      <p>変わりたいのに動けない時、人は意志が弱いから止まるのではありません。</p>
+      <p>今のあなたが、どの分岐に立っているのかを静かに見ていきましょう。</p>
+    </div>
+    <div class="scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-hint-line"></div>
+    </div>
+  </section>
+
+  <!-- 質問 -->
+  <section class="quiz-section" id="quiz">
+    <div class="section-label">Question</div>
+
+    <div id="questions-container"></div>
+
+    <div class="submit-area">
+      <div class="error-msg" id="error-msg">まだ答えていない質問があります</div>
+      <button class="btn-submit" id="btn-submit" onclick="submitQuiz()">
+        星の鍵をひらく
+      </button>
+    </div>
+  </section>
+
+  <!-- 結果 -->
+  <section id="result-area">
+    <div class="section-label">Your Key</div>
+
+    <div class="result-header">
+      <span class="result-type-badge" id="result-badge">Type — —</span>
+    </div>
+
+    <div class="result-card" id="result-card">
+      <span class="result-icon" id="result-icon"></span>
+      <p class="result-title" id="result-title"></p>
+      <h2 class="result-headline" id="result-headline"></h2>
+      <div class="result-divider"></div>
+      <div class="result-body" id="result-body"></div>
+    </div>
+
+    <div class="closing">
+      <div class="closing-line"></div>
+      <p class="closing-text">
+        この診断で見えたのは、<br>今のあなたが立っている分岐です。<br><br>
+        答えを急がなくて大丈夫。<br>ただ、もう分かっていることを<br>なかったことにはしないでください。
+      </p>
+      <p class="closing-final">あなたの笑顔に、<br>星が降り注ぎますように🌙</p>
+
+      <div class="line-cta">
+        <div class="line-cta-inner">
+          <p class="line-cta-label">✦ &nbsp; 続きは公式LINEで &nbsp; ✦</p>
+          <p class="line-cta-text">今のあなたに必要なことを、<br>無料鑑定でお伝えします。</p>
+          <a class="btn-line" href="https://lin.ee/S6jwWRX" target="_blank" rel="noopener">
+            🌙 &nbsp; 無料鑑定を受け取る
+          </a>
+          <p class="line-cta-note">※公式LINEに登録後、メッセージをお送りください</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="retry-area">
+      <button class="btn-retry" onclick="retryQuiz()">もう一度診断する</button>
+    </div>
+  </section>
+
+  <div class="footer">
+    <p>© ステラ🌙 月と星の隠れ家</p>
+  </div>
+
+</div>
+
+<script>
+  /* ── 星空 ── */
+  (function () {
+    const canvas = document.getElementById('starsCanvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [], sparkles = [], shootingStars = [];
+    let t = 0;
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function createStars() {
+      stars = [];
+      const count = Math.floor((canvas.width * canvas.height) / 3000);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.6 + 0.2,
+          speed: 0.002 + Math.random() * 0.006,
+          phase: Math.random() * Math.PI * 2,
+          color: Math.random() > 0.7 ? 'pink' : Math.random() > 0.5 ? 'lavender' : 'gold',
+        });
+      }
+      // キラキラ大粒
+      sparkles = [];
+      for (let i = 0; i < 12; i++) {
+        sparkles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: 2.5 + Math.random() * 2,
+          speed: 0.001 + Math.random() * 0.003,
+          phase: Math.random() * Math.PI * 2,
+        });
+      }
+    }
+
+    function spawnShootingStar() {
+      shootingStars.push({
+        x: Math.random() * canvas.width * 0.7,
+        y: Math.random() * canvas.height * 0.4,
+        len: 80 + Math.random() * 100,
+        speed: 4 + Math.random() * 3,
+        angle: Math.PI / 6,
+        alpha: 1,
+        progress: 0,
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      t++;
+
+      // 通常の星
+      stars.forEach(s => {
+        const alpha = 0.15 + 0.7 * (0.5 + 0.5 * Math.sin(t * s.speed + s.phase));
+        let color;
+        if (s.color === 'pink')    color = `rgba(240,180,210,${alpha})`;
+        else if (s.color === 'lavender') color = `rgba(200,170,240,${alpha})`;
+        else                        color = `rgba(240,210,140,${alpha})`;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+      });
+
+      // キラキラ大粒（十字の光芒）
+      sparkles.forEach(s => {
+        const alpha = 0.1 + 0.8 * (0.5 + 0.5 * Math.sin(t * s.speed + s.phase));
+        const size = s.r * (0.8 + 0.4 * Math.sin(t * s.speed * 1.3 + s.phase));
+        ctx.save();
+        ctx.translate(s.x, s.y);
+        ctx.globalAlpha = alpha;
+        // 十字
+        const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 3);
+        grad.addColorStop(0, 'rgba(248,232,180,1)');
+        grad.addColorStop(0.3, 'rgba(220,180,100,0.6)');
+        grad.addColorStop(1, 'rgba(220,180,100,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(0, 0, size * 3, 0, Math.PI * 2);
+        ctx.fill();
+        // 縦横の光芒
+        ctx.strokeStyle = `rgba(248,232,180,${alpha * 0.8})`;
+        ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(-size * 6, 0); ctx.lineTo(size * 6, 0); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, -size * 6); ctx.lineTo(0, size * 6); ctx.stroke();
+        ctx.restore();
+      });
+
+      // 流れ星
+      shootingStars = shootingStars.filter(ss => ss.alpha > 0);
+      shootingStars.forEach(ss => {
+        ss.progress += ss.speed;
+        ss.alpha = Math.max(0, 1 - ss.progress / ss.len);
+        const x2 = ss.x + ss.progress * Math.cos(ss.angle);
+        const y2 = ss.y + ss.progress * Math.sin(ss.angle);
+        const grad = ctx.createLinearGradient(ss.x, ss.y, x2, y2);
+        grad.addColorStop(0, `rgba(248,232,180,0)`);
+        grad.addColorStop(0.7, `rgba(248,232,180,${ss.alpha * 0.8})`);
+        grad.addColorStop(1, `rgba(255,255,255,${ss.alpha})`);
+        ctx.beginPath();
+        ctx.moveTo(ss.x, ss.y);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+
+      requestAnimationFrame(draw);
+    }
+
+    // 流れ星を定期的に生成
+    setInterval(spawnShootingStar, 4000 + Math.random() * 3000);
+    setTimeout(spawnShootingStar, 1500);
+
+    resize();
+    createStars();
+    requestAnimationFrame(draw);
+    window.addEventListener('resize', () => { resize(); createStars(); });
+  })();
+
+  /* ── 質問データ ── */
+  const questions = [
+    {
+      q: '今いちばん近い感覚は？',
+      choices: [
+        { key: 'A', text: '変えたいことはあるのに、<br>最後の一歩が出ない' },
+        { key: 'B', text: '変わろうとしても、<br>結局いつもの状態に戻る' },
+        { key: 'C', text: '本当は答えが出ているのに、<br>決めきれない' },
+      ],
+    },
+    {
+      q: '最近よく感じることは？',
+      choices: [
+        { key: 'A', text: '失うものを考えて、<br>止まってしまう' },
+        { key: 'B', text: '慣れた不安の方が、<br>まだ安心する' },
+        { key: 'C', text: 'もうこのままでは、<br>違うと感じる' },
+      ],
+    },
+    {
+      q: '行動できない時の理由は？',
+      choices: [
+        { key: 'A', text: '失敗や変化が怖い' },
+        { key: 'B', text: 'どうせまた同じと、<br>思ってしまう' },
+        { key: 'C', text: '決めたあとの現実が怖い' },
+      ],
+    },
+    {
+      q: '本音に近いのは？',
+      choices: [
+        { key: 'A', text: '進みたいけど、<br>まだ準備ができていない' },
+        { key: 'B', text: '変わりたいのに、<br>同じ選択をしてしまう' },
+        { key: 'C', text: 'もう分かっているのに、<br>誰かに背中を押してほしい' },
+      ],
+    },
+    {
+      q: '今の状態を一言で言うなら？',
+      choices: [
+        { key: 'A', text: '扉の前で止まっている' },
+        { key: 'B', text: '古い流れに戻っている' },
+        { key: 'C', text: '鍵を持ったまま迷っている' },
+      ],
+    },
+    {
+      q: 'いちばん怖いことは？',
+      choices: [
+        { key: 'A', text: '動いて失うこと' },
+        { key: 'B', text: '変わっても、<br>また戻ること' },
+        { key: 'C', text: '決めたら、<br>後戻りできないこと' },
+      ],
+    },
+    {
+      q: '今ほしい言葉は？',
+      choices: [
+        { key: 'A', text: 'まだ焦らなくていい' },
+        { key: 'B', text: '戻っている自分を、<br>責めなくていい' },
+        { key: 'C', text: 'もう決めていい' },
+      ],
+    },
+  ];
+
+  /* ── 結果データ ── */
+  const results = {
+    A: {
+      badge: 'Type A',
+      icon: '🚪',
+      title: '扉の前で止まっているタイプ',
+      headline: 'A｜扉の前で止まっているタイプ',
+      body: `<p>今のあなたは、進めない人ではありません。<br>もう扉の前まで来ています。</p><p>ただ、動いた先で何かを失う怖さがあり、<br>鍵に手を伸ばす直前で止まりやすい状態です。</p><p>今必要なのは、勢いではなく<br>「何を怖がっているのか」を見つめること。</p><p>星の鍵は、あなたを無理に進ませるためではなく、<br>本当の気持ちへ戻るために届いています。</p>`,
+    },
+    B: {
+      badge: 'Type B',
+      icon: '🌊',
+      title: '古い流れに戻ってしまうタイプ',
+      headline: 'B｜古い流れに戻ってしまうタイプ',
+      body: `<p>今のあなたは、変われない人ではありません。<br>古い流れの安心に戻りやすくなっているだけです。</p><p>慣れた不安は苦しくても予測できるため、<br>新しい変化より安全に見えてしまうことがあります。</p><p>今必要なのは、戻ってしまう自分を責めることではなく、<br>その癖に気づくこと。</p><p>同じ現実を終わらせる鍵は、<br>戻った自分に気づいた瞬間から動き始めます。</p>`,
+    },
+    C: {
+      badge: 'Type C',
+      icon: '🗝',
+      title: '鍵を持ったまま回せていないタイプ',
+      headline: 'C｜鍵を持ったまま回せていないタイプ',
+      body: `<p>今のあなたは、鍵がない人ではありません。<br>すでに鍵は手元にあります。</p><p>ただ、鍵を回したあとに<br>もう同じ場所には戻れないことを<br>どこかで分かっているからこそ、止まっています。</p><p>今必要なのは、答え探しではなく<br>覚悟を整えること。</p><p>星の鍵はもう届いています。<br>あとは、回すかどうかです。</p>`,
+    },
+  };
+
+  /* ── 質問を生成 ── */
+  function buildQuestions() {
+    const container = document.getElementById('questions-container');
+    container.innerHTML = '';
+    questions.forEach((q, idx) => {
+      const card = document.createElement('div');
+      card.className = 'question-card';
+      card.id = `qcard-${idx}`;
+
+      let choicesHTML = q.choices.map(c => `
+        <label class="choice-label">
+          <input type="radio" name="q${idx}" value="${c.key}">
+          <span class="choice-indicator"></span>
+          <span class="choice-text"><span class="choice-key">${c.key}.</span>${c.text}</span>
+        </label>
+      `).join('');
+
+      card.innerHTML = `
+        <span class="q-number">Q ${String(idx + 1).padStart(2, '0')} / 07</span>
+        <p class="q-text">${q.q}</p>
+        <div class="choices">${choicesHTML}</div>
+      `;
+
+      container.appendChild(card);
+    });
+
+    // Intersection Observer でカードをふわっと表示
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.question-card').forEach(card => observer.observe(card));
+  }
+
+  /* ── 診断を実行 ── */
+  function submitQuiz() {
+    const counts = { A: 0, B: 0, C: 0 };
+    let unanswered = false;
+
+    for (let i = 0; i < questions.length; i++) {
+      const selected = document.querySelector(`input[name="q${i}"]:checked`);
+      if (!selected) { unanswered = true; break; }
+      counts[selected.value]++;
+    }
+
+    const errorEl = document.getElementById('error-msg');
+    if (unanswered) {
+      errorEl.classList.add('show');
+      return;
+    }
+    errorEl.classList.remove('show');
+
+    // 優先順位: C → A → B（同点時）
+    let winner;
+    const max = Math.max(counts.A, counts.B, counts.C);
+    if (counts.C === max) winner = 'C';
+    else if (counts.A === max) winner = 'A';
+    else winner = 'B';
+
+    showResult(winner);
+  }
+
+  /* ── 結果を表示 ── */
+  function showResult(type) {
+    const r = results[type];
+    document.getElementById('result-badge').textContent = r.badge;
+    document.getElementById('result-icon').textContent = r.icon;
+    document.getElementById('result-title').textContent = r.title;
+    document.getElementById('result-headline').textContent = r.headline;
+    document.getElementById('result-body').innerHTML = r.body;
+
+    const area = document.getElementById('result-area');
+    area.classList.add('show');
+
+    // カードのアニメーションをリセット
+    const card = document.getElementById('result-card');
+    card.style.animation = 'none';
+    card.offsetHeight; // reflow
+    card.style.animation = '';
+
+    setTimeout(() => {
+      area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+
+  /* ── もう一度 ── */
+  function retryQuiz() {
+    document.getElementById('result-area').classList.remove('show');
+    buildQuestions();
+    document.getElementById('error-msg').classList.remove('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ── 初期化 ── */
+  buildQuestions();
+</script>
+
+</body>
+</html>
